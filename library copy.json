@@ -24,16 +24,11 @@
             "-Isrc/third_party/flatbuffers/include",
             "-Isrc/third_party/gemmlowp",
             "-Isrc/third_party/kissfft",
-            "-Isrc/third_party/ruy",
-            "-std=gnu++17"
-        ],
-        "unflags": [
-            "-std=gnu++11",
-            "-std=gnu++14",
-            "-std=c++11",
-            "-std=c++14"
+            "-Isrc/third_party/ruy"
         ]
     },
+
+    "extraScript": "extra_script.py",
     "frameworks": "*",
     "platforms": "*"
 }
