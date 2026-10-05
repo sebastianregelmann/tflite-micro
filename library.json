@@ -2,7 +2,7 @@
     "name": "tflite-micro",
     "version": "0.0.1",
     "description": "A tflite-micro fork that packs the newest files in a built format.",
-    "keywords": "TensorFlow, TensorFlow Lite Micro, tflm, tflite-micro",
+    "keywords": "TensorFlow,TensorFlow Lite Micro,tflm,tflite-micro,Tensor Flow Lite Micro, Machine learning, NN, neural network",
     "repository": {
         "type": "git",
         "url": "https://github.com/sebastianregelmann/tflite-micro.git"
@@ -15,9 +15,6 @@
         }
     ],
     "license": "Apache 2.0",
-    "dependencies": {
-        "ownername/print": "~1.3.0"
-    },
     "build": {
         "flags": [
             "-Isrc/thirdparty",
