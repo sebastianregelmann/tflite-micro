@@ -22,10 +22,9 @@
             "-Isrc/third_party/gemmlowp",
             "-Isrc/third_party/kissfft",
             "-Isrc/third_party/ruy"
-        ]
+        ],
+        "extraScript": "extra_script.py"
     },
-
-    "extraScript": "extra_script.py",
     "frameworks": "*",
     "platforms": "*"
 }
