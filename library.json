@@ -1,7 +1,7 @@
 {
     "name": "tflite-micro",
-    "version": "0.0.1",
-    "description": "A tflite-micro fork that packs the newest files in a built format.",
+    "version": "1.0.0",
+    "description": "A tflite-micro fork that packs the newest offical files in a built format that is usable with PlatformIO.",
     "keywords": "TensorFlow,TensorFlow Lite Micro,tflm,tflite-micro,Tensor Flow Lite Micro, Machine learning, NN, neural network",
     "repository": {
         "type": "git",

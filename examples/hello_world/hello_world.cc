@@ -1,3 +1,15 @@
+/*
+ * TensorFlow Lite for Microcontrollers (TFLM) - hello_world example
+ * 
+ * Converted from C++ hello_world example to a standalone Arduino Sketch.
+ * Performs two categories of tests:
+ *   1. Image with a person
+ *   2. Image with no person
+ *
+ * Requirements:
+ *   - Board with 150KB+ SRAM (ESP32, Teensy 4.x, Raspberry Pi Pico, nRF52840, etc.)
+ */
+
 #include <Arduino.h>
 
 // TFLite Micro Headers
