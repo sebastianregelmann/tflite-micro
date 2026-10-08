@@ -70,37 +70,33 @@ jobs:
 
           # 1. Update library.json version
           jq --arg v "$VERSION" '.version = $v' library.json > library.json.tmp && mv library.json.tmp library.json
+          echo Updated library.json
 
           # 2. Update README.md with required format
+          # 2. Update README.md commit URL
           python3 - << 'EOF'
           import os, re
 
-          version = os.environ.get('VERSION', '')
           commit_hash = os.environ.get('COMMIT_HASH', '')
           commit_url = f"https://github.com/tensorflow/tflite-micro/commit/{commit_hash}"
 
-          readme_path = 'readme.md'
+          readme_path = 'README.md' if os.path.exists('README.md') else 'readme.md'
+
           if os.path.exists(readme_path):
               with open(readme_path, 'r') as f:
                   content = f.read()
 
-              new_section = (
-                  f"# Version\n"
-                  f"This version is release `{version}`.\n\n"
-                  f"The current version of the library is a build from [this]({commit_url}) "
-                  f"commit to the official [tflite-micro](https://github.com/tensorflow/tflite-micro) repository."
-              )
-
-              pattern = r"# Version\nThis version is release `[^`]+`\.\n\nThe current version of the library is a build from [this]\([^)]+\) commit to the official [tflite-micro]\(https://github\.com/tensorflow/tflite-micro\) repository\."
+              # Match: using [this commit](https://github.com/tensorflow/tflite-micro/commit/<hash>)
+              pattern = r"using \[this commit\]\(https://github\.com/tensorflow/tflite-micro/commit/[a-fA-F0-9]+\)"
+              replacement = f"using [this commit]({commit_url})"
 
               if re.search(pattern, content):
-                  content = re.sub(pattern, new_section, content)
-              else:
-                  content = content + "\n\n" + new_section
+                  content = re.sub(pattern, replacement, content)
 
               with open(readme_path, 'w') as f:
                   f.write(content)
           EOF
+          echo "Updated README"
 
       - name: Create Commit to staging-release branch
         run: |
