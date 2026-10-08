@@ -2,14 +2,18 @@ name: TFLM Library Sync, Test & Publish Pipeline
 
 on:
   schedule:
-    - cron: '0 0 * * 0' # Weekly sync on Sundays
+    - cron: '0 0 * * 0'
   workflow_dispatch:
     inputs:
       custom_version:
-        description: 'Custom version override (e.g. 1.0.1). Leave empty to use auto version (1.YY.WW).'
+        description: 'Custom version override (e.g. 1.0.1)'
         required: false
         default: ''
         type: string
+
+# Grant write permissions to GITHUB_TOKEN
+permissions:
+  contents: write
 
 jobs:
   build-and-test:
