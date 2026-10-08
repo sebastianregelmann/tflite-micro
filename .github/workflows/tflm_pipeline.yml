@@ -67,11 +67,12 @@ jobs:
           jq --arg v "$VERSION" '.version = $v' library.json > library.json.tmp && mv library.json.tmp library.json
 
           # 2. Update README.md with required format
-          python3 -c "
-          import re, os
-          version = '$VERSION'
-          commit_hash = '$COMMIT_HASH'
-          commit_url = f'https://github.com/tensorflow/tflite-micro/commit/{commit_hash}'
+          python3 - << 'EOF'
+          import os, re
+
+          version = os.environ.get('VERSION', '')
+          commit_hash = os.environ.get('COMMIT_HASH', '')
+          commit_url = f"https://github.com/tensorflow/tflite-micro/commit/{commit_hash}"
 
           readme_path = 'README.md'
           if os.path.exists(readme_path):
@@ -79,23 +80,23 @@ jobs:
                   content = f.read()
 
               new_section = (
-                  f'# Version\n'
-                  f'This version is release \`{version}\`.\n\n'
-                  f'The current version of the library is a build from [this]({commit_url}) '
-                  f'commit to the official [tflite-micro](https://github.com/tensorflow/tflite-micro) repository.'
+                  f"# Version\n"
+                  f"This version is release `{version}`.\n\n"
+                  f"The current version of the library is a build from [this]({commit_url}) "
+                  f"commit to the official [tflite-micro](https://github.com/tensorflow/tflite-micro) repository."
               )
 
-              pattern = r'# Version\nThis version is release `[^`]+`\.\n\nThe current version of the library is a build from [this]\([^)]+\) commit to the official [tflite-micro]\(https://github\.com/tensorflow/tflite-micro\) repository\.'
+              pattern = r"# Version\nThis version is release `[^`]+`\.\n\nThe current version of the library is a build from [this]\([^)]+\) commit to the official [tflite-micro]\(https://github\.com/tensorflow/tflite-micro\) repository\."
 
               if re.search(pattern, content):
                   content = re.sub(pattern, new_section, content)
               else:
-                  content = content + '\n\n' + new_section
+                  content = content + "\n\n" + new_section
 
               with open(readme_path, 'w') as f:
                   f.write(content)
-          "
-
+          EOF
+          
       - name: Create Local Commit
         run: |
           git config user.name "github-actions[bot]"
