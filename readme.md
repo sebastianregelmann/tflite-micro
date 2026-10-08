@@ -36,3 +36,8 @@ I plan to automate this repository using Gihub Actions and workflows to automate
 # License
 Apache License
                            Version 2.0
+
+# Version
+This version is release ``.
+
+The current version of the library is a build from [this](https://github.com/tensorflow/tflite-micro/commit/904193e691ede876f4b8b70e6abe68ae464072f9) commit to the official [tflite-micro](https://github.com/tensorflow/tflite-micro) repository.

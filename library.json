@@ -1,30 +1,30 @@
 {
-    "name": "tflite-micro",
-    "version": "1.0.0",
-    "description": "A tflite-micro fork that packs the newest offical files in a built format that is usable with PlatformIO.",
-    "keywords": "TensorFlow,TensorFlow Lite Micro,tflm,tflite-micro,Tensor Flow Lite Micro, Machine learning, NN, neural network",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/sebastianregelmann/tflite-micro.git"
-    },
-    "authors": [
-        {
-            "name": "Sebastian Regelmann",
-            "url": "https://github.com/sebastianregelmann",
-            "maintainer": true
-        }
+  "name": "tflite-micro",
+  "version": "1.0.1",
+  "description": "A tflite-micro fork that packs the newest offical files in a built format that is usable with PlatformIO.",
+  "keywords": "TensorFlow,TensorFlow Lite Micro,tflm,tflite-micro,Tensor Flow Lite Micro, Machine learning, NN, neural network",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sebastianregelmann/tflite-micro.git"
+  },
+  "authors": [
+    {
+      "name": "Sebastian Regelmann",
+      "url": "https://github.com/sebastianregelmann",
+      "maintainer": true
+    }
+  ],
+  "license": "Apache-2.0",
+  "build": {
+    "flags": [
+      "-Isrc/thirdparty",
+      "-Isrc/third_party/flatbuffers/include",
+      "-Isrc/third_party/gemmlowp",
+      "-Isrc/third_party/kissfft",
+      "-Isrc/third_party/ruy"
     ],
-    "license": "Apache-2.0",
-    "build": {
-        "flags": [
-            "-Isrc/thirdparty",
-            "-Isrc/third_party/flatbuffers/include",
-            "-Isrc/third_party/gemmlowp",
-            "-Isrc/third_party/kissfft",
-            "-Isrc/third_party/ruy"
-        ],
-        "extraScript": "extra_script.py"
-    },
-    "frameworks": "*",
-    "platforms": "*"
+    "extraScript": "extra_script.py"
+  },
+  "frameworks": "*",
+  "platforms": "*"
 }

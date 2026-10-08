@@ -18,30 +18,8 @@ limitations under the License.
 #include <stdint.h>
 
 #ifdef __cplusplus
-extern "C" {
-#endif
-
-#if !defined(TENSORFLOW_LITE_CORE_C_C_API_TYPES_H_) && \
-    !defined(TENSORFLOW_LITE_C_C_API_TYPES_H_) &&      \
-    !defined(TENSORFLOW_COMPILER_MLIR_LITE_CORE_C_TFLITE_TYPES_H_)
-#define TENSORFLOW_LITE_CORE_C_C_API_TYPES_H_
-#define TENSORFLOW_LITE_C_C_API_TYPES_H_
-#define TENSORFLOW_COMPILER_MLIR_LITE_CORE_C_TFLITE_TYPES_H_
-
-#ifdef SWIG
-#define TFL_CAPI_EXPORT
-#elif defined(TFL_STATIC_LIBRARY_BUILD)
-#define TFL_CAPI_EXPORT
-#else
-#if defined(_WIN32)
-#ifdef TFL_COMPILE_LIBRARY
-#define TFL_CAPI_EXPORT __declspec(dllexport)
-#else
-#define TFL_CAPI_EXPORT
-#endif
-#else
-#define TFL_CAPI_EXPORT __attribute__((visibility("default")))
-#endif
+namespace tflite {
+namespace micro {
 #endif
 
 typedef enum {
@@ -76,11 +54,6 @@ typedef struct TfLiteQuantizationParams {
   int32_t zero_point;
 } TfLiteQuantizationParams;
 
-typedef enum TfLiteDimensionType {
-  kTfLiteDimDense = 0,
-  kTfLiteDimSparseCSR,
-} TfLiteDimensionType;
-
 typedef enum TfLiteStatus {
   kTfLiteOk = 0,
   kTfLiteError = 1,
@@ -95,17 +68,93 @@ typedef enum TfLiteStatus {
   kTfLiteAbort = 15,
 } TfLiteStatus;
 
-typedef struct TfLiteOpaqueContext TfLiteOpaqueContext;
-typedef struct TfLiteOpaqueNode TfLiteOpaqueNode;
-typedef struct TfLiteOpaqueTensor TfLiteOpaqueTensor;
-typedef struct TfLiteDelegate TfLiteDelegate;
-typedef struct TfLiteOpaqueDelegateStruct TfLiteOpaqueDelegateStruct;
-typedef struct TfLiteDelegate TfLiteOpaqueDelegate;
-
-#endif  // !defined(TENSORFLOW_LITE_CORE_C_C_API_TYPES_H_)
-
 #ifdef __cplusplus
-}  // extern "C"
+}  // namespace micro
+
+using micro::kTfLiteAbort;
+using micro::kTfLiteApplicationError;
+using micro::kTfLiteBFloat16;
+using micro::kTfLiteBool;
+using micro::kTfLiteCancelled;
+using micro::kTfLiteComplex128;
+using micro::kTfLiteComplex64;
+using micro::kTfLiteDelegateDataNotFound;
+using micro::kTfLiteDelegateDataReadError;
+using micro::kTfLiteDelegateDataWriteError;
+using micro::kTfLiteDelegateError;
+using micro::kTfLiteError;
+using micro::kTfLiteFloat16;
+using micro::kTfLiteFloat32;
+using micro::kTfLiteFloat64;
+using micro::kTfLiteFloat8E4M3FN;
+using micro::kTfLiteFloat8E5M2;
+using micro::kTfLiteInt16;
+using micro::kTfLiteInt2;
+using micro::kTfLiteInt32;
+using micro::kTfLiteInt4;
+using micro::kTfLiteInt64;
+using micro::kTfLiteInt8;
+using micro::kTfLiteNoType;
+using micro::kTfLiteOk;
+using micro::kTfLiteOutputShapeNotKnown;
+using micro::kTfLiteResource;
+using micro::kTfLiteString;
+using micro::kTfLiteUInt16;
+using micro::kTfLiteUInt32;
+using micro::kTfLiteUInt4;
+using micro::kTfLiteUInt64;
+using micro::kTfLiteUInt8;
+using micro::kTfLiteUnresolvedOps;
+using micro::kTfLiteVariant;
+using micro::TfLiteQuantizationParams;
+using micro::TfLiteStatus;
+using micro::TfLiteType;
+
+}  // namespace tflite
+
+#if !defined(TFLM_NO_GLOBAL_C_ALIASES) &&              \
+    !defined(TENSORFLOW_LITE_CORE_C_C_API_TYPES_H_) && \
+    !defined(TENSORFLOW_LITE_C_C_API_TYPES_H_) &&      \
+    !defined(TENSORFLOW_COMPILER_MLIR_LITE_CORE_C_TFLITE_TYPES_H_)
+using ::tflite::micro::kTfLiteAbort;
+using ::tflite::micro::kTfLiteApplicationError;
+using ::tflite::micro::kTfLiteBFloat16;
+using ::tflite::micro::kTfLiteBool;
+using ::tflite::micro::kTfLiteCancelled;
+using ::tflite::micro::kTfLiteComplex128;
+using ::tflite::micro::kTfLiteComplex64;
+using ::tflite::micro::kTfLiteDelegateDataNotFound;
+using ::tflite::micro::kTfLiteDelegateDataReadError;
+using ::tflite::micro::kTfLiteDelegateDataWriteError;
+using ::tflite::micro::kTfLiteDelegateError;
+using ::tflite::micro::kTfLiteError;
+using ::tflite::micro::kTfLiteFloat16;
+using ::tflite::micro::kTfLiteFloat32;
+using ::tflite::micro::kTfLiteFloat64;
+using ::tflite::micro::kTfLiteFloat8E4M3FN;
+using ::tflite::micro::kTfLiteFloat8E5M2;
+using ::tflite::micro::kTfLiteInt16;
+using ::tflite::micro::kTfLiteInt2;
+using ::tflite::micro::kTfLiteInt32;
+using ::tflite::micro::kTfLiteInt4;
+using ::tflite::micro::kTfLiteInt64;
+using ::tflite::micro::kTfLiteInt8;
+using ::tflite::micro::kTfLiteNoType;
+using ::tflite::micro::kTfLiteOk;
+using ::tflite::micro::kTfLiteOutputShapeNotKnown;
+using ::tflite::micro::kTfLiteResource;
+using ::tflite::micro::kTfLiteString;
+using ::tflite::micro::kTfLiteUInt16;
+using ::tflite::micro::kTfLiteUInt32;
+using ::tflite::micro::kTfLiteUInt4;
+using ::tflite::micro::kTfLiteUInt64;
+using ::tflite::micro::kTfLiteUInt8;
+using ::tflite::micro::kTfLiteUnresolvedOps;
+using ::tflite::micro::kTfLiteVariant;
+using ::tflite::micro::TfLiteQuantizationParams;
+using ::tflite::micro::TfLiteStatus;
+using ::tflite::micro::TfLiteType;
 #endif
+#endif  // __cplusplus
 
 #endif  // TENSORFLOW_LITE_MICRO_C_C_API_TYPES_H_

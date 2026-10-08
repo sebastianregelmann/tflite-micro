@@ -71,8 +71,8 @@ TfLiteTensor* MicroContext::AllocateTempIntermediateTensor(
   return AllocateTempTfLiteTensor(tensor_index);
 }
 
-void MicroContextReportOpError(struct TfLiteContext* context,
-                               const char* format, ...) {
+void MicroContextReportOpError(TfLiteContext* context, const char* format,
+                               ...) {
   va_list args;
   va_start(args, format);
   VMicroPrintf(format, args);
@@ -182,6 +182,18 @@ TfLiteStatus MicroContext::SetCustomDecodeRegistrations(
   custom_decode_registrations_ = registrations;
   custom_decode_registrations_size_ = count;
   return kTfLiteOk;
+}
+
+void MicroContext::InitTfLiteContext(TfLiteContext* context) {
+  context->impl_ = static_cast<void*>(this);
+  context->ReportError = MicroContextReportOpError;
+  context->GetTensor = MicroContextGetTensor;
+  context->GetEvalTensor = MicroContextGetEvalTensor;
+  context->RequestScratchBufferInArena =
+      MicroContextRequestScratchBufferInArena;
+  context->GetExternalContext = MicroContextGetExternalContext;
+  context->AllocatePersistentBuffer = MicroContextAllocatePersistentBuffer;
+  context->GetScratchBuffer = MicroContextGetScratchBuffer;
 }
 
 }  // namespace tflite

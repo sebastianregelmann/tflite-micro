@@ -1,38 +1,37 @@
-// Copyright 2015 The Gemmlowp Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/* Copyright 2026 The TensorFlow Authors. All Rights Reserved.
 
-// fixedpoint.h: fixed-point arithmetic, with basic operations and
-// a few math functions such as tanh.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-#ifndef GEMMLOWP_INTERNAL_FIXEDPOINT_H_
-#define GEMMLOWP_INTERNAL_FIXEDPOINT_H_
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+==============================================================================*/
+// fixedpoint.h: scalar fixed-point arithmetic, with basic operations and
+// a few math functions such as tanh and logistic.
+// Adapted from gemmlowp/fixedpoint/fixedpoint.h.
+
+#ifndef TENSORFLOW_LITE_MICRO_KERNELS_INTERNAL_FIXEDPOINT_H_
+#define TENSORFLOW_LITE_MICRO_KERNELS_INTERNAL_FIXEDPOINT_H_
 
 #include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstdint>
 #include <limits>
+#include <type_traits>
 
-#include "../internal/detect_platform.h"
-
-namespace gemmlowp {
+namespace tflite {
+namespace micro {
 
 // Part 1: Low-level integer-arithmetic primitives.
 // The implementations here are generic implementations valid for
-// scalar types (e.g. std::int32_t). Architecture-specific SIMD types
-// (e.g. NEON int32x4_t) may be supported by providing
-// specializations for them in separate files.
+// scalar types (e.g. std::int32_t, std::int16_t).
 //
 // The purpose of these primitives is two-fold:
 //  - They will be used to implement higher-level fixed-point
@@ -42,8 +41,8 @@ namespace gemmlowp {
 //    fixed-point computations, e.g. the fixed-point implementation
 //    of math functions such as tanh.
 
-// Some compile-time traits around raw types to handle SIMD aspects:
-// number of lanes, underlying scalar type.
+// Compile-time traits around raw types: number of lanes, underlying scalar
+// type.
 template <typename tIntegerType>
 struct FixedPointRawTypeTraits {};
 
@@ -59,7 +58,7 @@ struct FixedPointRawTypeTraits<std::int16_t> {
   static constexpr int kLanes = 1;
 };
 
-// Returns a SIMD value duplicating a scalar value across all lanes.
+// Returns a value duplicating a scalar value across all lanes.
 template <typename tRawType>
 tRawType Dup(typename FixedPointRawTypeTraits<tRawType>::ScalarRawType x) {
   return x;
@@ -95,12 +94,13 @@ tIntegerType Add(tIntegerType a, tIntegerType b) {
   return a + b;
 }
 
-// Integer subtraction. Not saturating. Overflow is undefined behavior.
+// Integer multiplication. Not saturating. Overflow is undefined behavior.
 template <typename tIntegerType>
 tIntegerType Mul(tIntegerType a, tIntegerType b) {
   return a * b;
 }
 
+// Integer subtraction. Not saturating. Overflow is undefined behavior.
 template <typename tIntegerType>
 tIntegerType Sub(tIntegerType a, tIntegerType b) {
   return a - b;
@@ -127,10 +127,9 @@ tIntegerType ShiftLeft(tIntegerType a, int offset) {
   const std::int64_t wide_shifted = wide_a * (1 << offset);
   const auto min = std::numeric_limits<tIntegerType>::min();
   const auto max = std::numeric_limits<tIntegerType>::max();
-  return wide_shifted < min
-             ? min
-             : wide_shifted > max ? max
-                                  : static_cast<tIntegerType>(wide_shifted);
+  return wide_shifted < min   ? min
+         : wide_shifted > max ? max
+                              : static_cast<tIntegerType>(wide_shifted);
 }
 
 // Integer arithmetic right-shift. Not rounding.
@@ -372,7 +371,9 @@ inline IntegerType RoundingDivideByPOT(IntegerType x, int exponent) {
 // left shift, saturating) or a negative exponent (equivalent to an arithmetic
 // right shift, rounding to nearest).
 template <int Exponent, typename IntegerType,
-          int ExponentSign = (Exponent > 0 ? 1 : Exponent < 0 ? -1 : 0)>
+          int ExponentSign = (Exponent > 0   ? 1
+                              : Exponent < 0 ? -1
+                                             : 0)>
 struct ImplSaturatingRoundingMultiplyByPOT {};
 
 template <int Exponent, typename IntegerType>
@@ -420,10 +421,7 @@ IntegerType SaturatingRoundingMultiplyByPOT(IntegerType x) {
 // Part 2: the FixedPoint class.
 
 // A FixedPoint object represents a fixed-point value stored in the underlying
-// integer type tRawType, if tRawType is a plain scalar integer type.
-// Alternatively, tRawType may be a SIMD type (e.g. NEON int32x4_t) in which
-// case a FixedPoint object represents a corresponding SIMD vector of fixed
-// point values.
+// integer type tRawType.
 //
 // tIntegerBits describes the range of the fixed-point format: if
 // tIntegerBits == m then the range of representable values is the half-open
@@ -468,14 +466,6 @@ class FixedPoint {
 
   static const ScalarRawType ScalarRawMax() {
     return std::numeric_limits<ScalarRawType>::max();
-  }
-
-  static const ScalarRawType RawMin() {
-    return VectorFromScalar(ScalarRawMin());
-  }
-
-  static const ScalarRawType RawMax() {
-    return VectorFromScalar(ScalarRawMax());
   }
 
   static FixedPoint FromRaw(RawType x) {
@@ -564,58 +554,58 @@ FixedPoint<tRawType, tIntegerBits> SaturatingRoundingMultiplyByPOT(
 
 // Generic arithmetic operators.
 
-#define MAKE_FIXEDPOINT_UNARY_FUNC(FuncName, ImplFuncName)                     \
+#define TFLITE_MICRO_MAKE_FIXEDPOINT_UNARY_FUNC(FuncName, ImplFuncName)        \
   template <typename tRawType, int tIntegerBits>                               \
   FixedPoint<tRawType, tIntegerBits> FuncName(                                 \
       FixedPoint<tRawType, tIntegerBits> a) {                                  \
     return FixedPoint<tRawType, tIntegerBits>::FromRaw(ImplFuncName(a.raw())); \
   }
 
-#define MAKE_FIXEDPOINT_BINARY_FUNC(FuncName, ImplFuncName) \
-  template <typename tRawType, int tIntegerBits>            \
-  FixedPoint<tRawType, tIntegerBits> FuncName(              \
-      FixedPoint<tRawType, tIntegerBits> a,                 \
-      FixedPoint<tRawType, tIntegerBits> b) {               \
-    return FixedPoint<tRawType, tIntegerBits>::FromRaw(     \
-        ImplFuncName(a.raw(), b.raw()));                    \
+#define TFLITE_MICRO_MAKE_FIXEDPOINT_BINARY_FUNC(FuncName, ImplFuncName) \
+  template <typename tRawType, int tIntegerBits>                         \
+  FixedPoint<tRawType, tIntegerBits> FuncName(                           \
+      FixedPoint<tRawType, tIntegerBits> a,                              \
+      FixedPoint<tRawType, tIntegerBits> b) {                            \
+    return FixedPoint<tRawType, tIntegerBits>::FromRaw(                  \
+        ImplFuncName(a.raw(), b.raw()));                                 \
   }
 
-MAKE_FIXEDPOINT_UNARY_FUNC(operator-, Neg)
-MAKE_FIXEDPOINT_UNARY_FUNC(operator~, BitNot)
-MAKE_FIXEDPOINT_BINARY_FUNC(operator+, Add)
-MAKE_FIXEDPOINT_BINARY_FUNC(operator-, Sub)
-MAKE_FIXEDPOINT_BINARY_FUNC(operator&, BitAnd)
-MAKE_FIXEDPOINT_BINARY_FUNC(operator^, BitXor)
-MAKE_FIXEDPOINT_BINARY_FUNC(operator|, BitOr)
-MAKE_FIXEDPOINT_BINARY_FUNC(RoundingHalfSum, RoundingHalfSum)
+TFLITE_MICRO_MAKE_FIXEDPOINT_UNARY_FUNC(operator-, Neg)
+TFLITE_MICRO_MAKE_FIXEDPOINT_UNARY_FUNC(operator~, BitNot)
+TFLITE_MICRO_MAKE_FIXEDPOINT_BINARY_FUNC(operator+, Add)
+TFLITE_MICRO_MAKE_FIXEDPOINT_BINARY_FUNC(operator-, Sub)
+TFLITE_MICRO_MAKE_FIXEDPOINT_BINARY_FUNC(operator&, BitAnd)
+TFLITE_MICRO_MAKE_FIXEDPOINT_BINARY_FUNC(operator^, BitXor)
+TFLITE_MICRO_MAKE_FIXEDPOINT_BINARY_FUNC(operator|, BitOr)
+TFLITE_MICRO_MAKE_FIXEDPOINT_BINARY_FUNC(RoundingHalfSum, RoundingHalfSum)
 
-#undef MAKE_FIXEDPOINT_UNARY_FUNC
-#undef MAKE_FIXEDPOINT_BINARY_FUNC
+#undef TFLITE_MICRO_MAKE_FIXEDPOINT_UNARY_FUNC
+#undef TFLITE_MICRO_MAKE_FIXEDPOINT_BINARY_FUNC
 
-#define MAKE_FIXEDPOINT_UNARY_FUNC_RETURNING_RAW(FuncName)  \
-  template <typename tRawType, int tIntegerBits>            \
-  tRawType FuncName(FixedPoint<tRawType, tIntegerBits> a) { \
-    return FuncName(a.raw());                               \
+#define TFLITE_MICRO_MAKE_FIXEDPOINT_UNARY_FUNC_RETURNING_RAW(FuncName) \
+  template <typename tRawType, int tIntegerBits>                        \
+  tRawType FuncName(FixedPoint<tRawType, tIntegerBits> a) {             \
+    return FuncName(a.raw());                                           \
   }
 
-#define MAKE_FIXEDPOINT_BINARY_FUNC_RETURNING_RAW(FuncName) \
-  template <typename tRawType, int tIntegerBits>            \
-  tRawType FuncName(FixedPoint<tRawType, tIntegerBits> a,   \
-                    FixedPoint<tRawType, tIntegerBits> b) { \
-    return FuncName(a.raw(), b.raw());                      \
+#define TFLITE_MICRO_MAKE_FIXEDPOINT_BINARY_FUNC_RETURNING_RAW(FuncName) \
+  template <typename tRawType, int tIntegerBits>                         \
+  tRawType FuncName(FixedPoint<tRawType, tIntegerBits> a,                \
+                    FixedPoint<tRawType, tIntegerBits> b) {              \
+    return FuncName(a.raw(), b.raw());                                   \
   }
 
-MAKE_FIXEDPOINT_UNARY_FUNC_RETURNING_RAW(MaskIfZero)
-MAKE_FIXEDPOINT_UNARY_FUNC_RETURNING_RAW(MaskIfNonZero)
-MAKE_FIXEDPOINT_BINARY_FUNC_RETURNING_RAW(MaskIfEqual)
-MAKE_FIXEDPOINT_BINARY_FUNC_RETURNING_RAW(MaskIfNotEqual)
-MAKE_FIXEDPOINT_BINARY_FUNC_RETURNING_RAW(MaskIfGreaterThan)
-MAKE_FIXEDPOINT_BINARY_FUNC_RETURNING_RAW(MaskIfGreaterThanOrEqual)
-MAKE_FIXEDPOINT_BINARY_FUNC_RETURNING_RAW(MaskIfLessThan)
-MAKE_FIXEDPOINT_BINARY_FUNC_RETURNING_RAW(MaskIfLessThanOrEqual)
+TFLITE_MICRO_MAKE_FIXEDPOINT_UNARY_FUNC_RETURNING_RAW(MaskIfZero)
+TFLITE_MICRO_MAKE_FIXEDPOINT_UNARY_FUNC_RETURNING_RAW(MaskIfNonZero)
+TFLITE_MICRO_MAKE_FIXEDPOINT_BINARY_FUNC_RETURNING_RAW(MaskIfEqual)
+TFLITE_MICRO_MAKE_FIXEDPOINT_BINARY_FUNC_RETURNING_RAW(MaskIfNotEqual)
+TFLITE_MICRO_MAKE_FIXEDPOINT_BINARY_FUNC_RETURNING_RAW(MaskIfGreaterThan)
+TFLITE_MICRO_MAKE_FIXEDPOINT_BINARY_FUNC_RETURNING_RAW(MaskIfGreaterThanOrEqual)
+TFLITE_MICRO_MAKE_FIXEDPOINT_BINARY_FUNC_RETURNING_RAW(MaskIfLessThan)
+TFLITE_MICRO_MAKE_FIXEDPOINT_BINARY_FUNC_RETURNING_RAW(MaskIfLessThanOrEqual)
 
-#undef MAKE_FIXEDPOINT_UNARY_FUNC_RETURNING_RAW
-#undef MAKE_FIXEDPOINT_BINARY_FUNC_RETURNING_RAW
+#undef TFLITE_MICRO_MAKE_FIXEDPOINT_UNARY_FUNC_RETURNING_RAW
+#undef TFLITE_MICRO_MAKE_FIXEDPOINT_BINARY_FUNC_RETURNING_RAW
 
 template <typename tRawType, int tIntegerBits>
 FixedPoint<tRawType, tIntegerBits> SelectUsingMask(
@@ -691,7 +681,7 @@ inline typename FixedPointType::ScalarRawType RescaleConstantInitializer(
   return static_cast<ScalarRawType>(
       RoundingDivideByPOT<std::int32_t>(int32_value, 32 - ScalarTypeBits));
 }
-#ifdef GEMMLOWP_ENABLE_FIXEDPOINT_CONSTANTS_CHECKS
+#ifdef TFLITE_MICRO_ENABLE_FIXEDPOINT_CONSTANTS_CHECKS
 template <typename FixedPointType>
 FixedPointType CheckedFixedPointConstant(std::int32_t raw_value,
                                          double double_value) {
@@ -699,18 +689,18 @@ FixedPointType CheckedFixedPointConstant(std::int32_t raw_value,
   assert(result == FixedPointType::FromDouble(double_value));
   return result;
 }
-#define GEMMLOWP_CHECKED_FIXEDPOINT_CONSTANT(FixedPointType,                   \
-                                             ScalarRawInt32Value, DoubleValue) \
-  (gemmlowp::CheckedFixedPointConstant<FixedPointType>(                        \
-      gemmlowp::RescaleConstantInitializer<FixedPointType>(                    \
-          ScalarRawInt32Value),                                                \
+#define TFLITE_MICRO_CHECKED_FIXEDPOINT_CONSTANT(                  \
+    FixedPointType, ScalarRawInt32Value, DoubleValue)              \
+  (::tflite::micro::CheckedFixedPointConstant<FixedPointType>(     \
+      ::tflite::micro::RescaleConstantInitializer<FixedPointType>( \
+          ScalarRawInt32Value),                                    \
       DoubleValue))
 
 #else
-#define GEMMLOWP_CHECKED_FIXEDPOINT_CONSTANT(FixedPointType,                   \
-                                             ScalarRawInt32Value, DoubleValue) \
-  (FixedPointType::FromScalarRaw(                                              \
-      gemmlowp::RescaleConstantInitializer<FixedPointType>(                    \
+#define TFLITE_MICRO_CHECKED_FIXEDPOINT_CONSTANT(                  \
+    FixedPointType, ScalarRawInt32Value, DoubleValue)              \
+  (FixedPointType::FromScalarRaw(                                  \
+      ::tflite::micro::RescaleConstantInitializer<FixedPointType>( \
           ScalarRawInt32Value)))
 #endif
 
@@ -721,10 +711,10 @@ template <typename tRawType>
 FixedPoint<tRawType, 0> exp_on_interval_between_negative_one_quarter_and_0_excl(
     FixedPoint<tRawType, 0> a) {
   typedef FixedPoint<tRawType, 0> F;
-  const F constant_term =
-      GEMMLOWP_CHECKED_FIXEDPOINT_CONSTANT(F, 1895147668, std::exp(-1.0 / 8.0));
+  const F constant_term = TFLITE_MICRO_CHECKED_FIXEDPOINT_CONSTANT(
+      F, 1895147668, std::exp(-1.0 / 8.0));
   const F constant_1_over_3 =
-      GEMMLOWP_CHECKED_FIXEDPOINT_CONSTANT(F, 715827883, 1.0 / 3.0);
+      TFLITE_MICRO_CHECKED_FIXEDPOINT_CONSTANT(F, 715827883, 1.0 / 3.0);
   // We're evaluating a Taylor expansion around -1/8, so we do the change of
   // variable: x = a + 1/8.
   // In fixed-point with 0 integer bits, 1/8 is represented by 1 << 28.
@@ -756,9 +746,9 @@ FixedPoint<tRawType, 0> exp_on_negative_values(
       Rescale<0>(a_mod_quarter_minus_one_quarter));
   tRawType remainder = (a_mod_quarter_minus_one_quarter - a).raw();
 
-#define GEMMLOWP_EXP_BARREL_SHIFTER(Exponent, FixedPointMultiplier)         \
+#define TFLITE_MICRO_EXP_BARREL_SHIFTER(Exponent, FixedPointMultiplier)     \
   if (kIntegerBits > Exponent) {                                            \
-    const ResultF kMultiplier = GEMMLOWP_CHECKED_FIXEDPOINT_CONSTANT(       \
+    const ResultF kMultiplier = TFLITE_MICRO_CHECKED_FIXEDPOINT_CONSTANT(   \
         ResultF, FixedPointMultiplier, std::exp(-std::pow(2.0, Exponent))); \
     static constexpr int kShiftAmount =                                     \
         kIntegerBits > Exponent ? kFractionalBits + Exponent : 0;           \
@@ -767,20 +757,20 @@ FixedPoint<tRawType, 0> exp_on_negative_values(
         result * kMultiplier, result);                                      \
   }
 
-  GEMMLOWP_EXP_BARREL_SHIFTER(-2, 1672461947);
-  GEMMLOWP_EXP_BARREL_SHIFTER(-1, 1302514674);
-  GEMMLOWP_EXP_BARREL_SHIFTER(+0, 790015084);
-  GEMMLOWP_EXP_BARREL_SHIFTER(+1, 290630308);
-  GEMMLOWP_EXP_BARREL_SHIFTER(+2, 39332535);
-  GEMMLOWP_EXP_BARREL_SHIFTER(+3, 720401);
-  GEMMLOWP_EXP_BARREL_SHIFTER(+4, 242);
+  TFLITE_MICRO_EXP_BARREL_SHIFTER(-2, 1672461947);
+  TFLITE_MICRO_EXP_BARREL_SHIFTER(-1, 1302514674);
+  TFLITE_MICRO_EXP_BARREL_SHIFTER(+0, 790015084);
+  TFLITE_MICRO_EXP_BARREL_SHIFTER(+1, 290630308);
+  TFLITE_MICRO_EXP_BARREL_SHIFTER(+2, 39332535);
+  TFLITE_MICRO_EXP_BARREL_SHIFTER(+3, 720401);
+  TFLITE_MICRO_EXP_BARREL_SHIFTER(+4, 242);
 
-#undef GEMMLOWP_EXP_BARREL_SHIFTER
+#undef TFLITE_MICRO_EXP_BARREL_SHIFTER
 
   static constexpr int clampB = kIntegerBits > 5 ? 36 - kIntegerBits : 0;
   if (kIntegerBits > 5) {
     const InputF clamp =
-        GEMMLOWP_CHECKED_FIXEDPOINT_CONSTANT(InputF, -(1 << clampB), -32.0);
+        TFLITE_MICRO_CHECKED_FIXEDPOINT_CONSTANT(InputF, -(1 << clampB), -32.0);
     result = SelectUsingMask(MaskIfLessThan(a, clamp), ResultF::Zero(), result);
   }
 
@@ -801,9 +791,9 @@ FixedPoint<tRawType, 0> one_minus_x_over_one_plus_x_for_x_in_0_1(
   // https://en.wikipedia.org/wiki/Division_algorithm#Newton.E2.80.93Raphson_division
   // Refer to that page for the logic behind the 48/17 and 32/17 constants.
   const F2 constant_48_over_17 =
-      GEMMLOWP_CHECKED_FIXEDPOINT_CONSTANT(F2, 1515870810, 48.0 / 17.0);
+      TFLITE_MICRO_CHECKED_FIXEDPOINT_CONSTANT(F2, 1515870810, 48.0 / 17.0);
   const F2 constant_neg_32_over_17 =
-      GEMMLOWP_CHECKED_FIXEDPOINT_CONSTANT(F2, -1010580540, -32.0 / 17.0);
+      TFLITE_MICRO_CHECKED_FIXEDPOINT_CONSTANT(F2, -1010580540, -32.0 / 17.0);
   F2 x = constant_48_over_17 + half_denominator * constant_neg_32_over_17;
   for (int i = 0; i < 3; i++) {
     F2 half_denominator_times_x = half_denominator * x;
@@ -848,9 +838,9 @@ FixedPoint<tRawType, 0> one_over_one_plus_x_for_x_in_0_1(
   // https://en.wikipedia.org/wiki/Division_algorithm#Newton.E2.80.93Raphson_division
   // Refer to that page for the logic behind the 48/17 and 32/17 constants.
   const F2 constant_48_over_17 =
-      GEMMLOWP_CHECKED_FIXEDPOINT_CONSTANT(F2, 1515870810, 48.0 / 17.0);
+      TFLITE_MICRO_CHECKED_FIXEDPOINT_CONSTANT(F2, 1515870810, 48.0 / 17.0);
   const F2 constant_neg_32_over_17 =
-      GEMMLOWP_CHECKED_FIXEDPOINT_CONSTANT(F2, -1010580540, -32.0 / 17.0);
+      TFLITE_MICRO_CHECKED_FIXEDPOINT_CONSTANT(F2, -1010580540, -32.0 / 17.0);
   F2 x = constant_48_over_17 + half_denominator * constant_neg_32_over_17;
   for (int i = 0; i < 3; i++) {
     F2 half_denominator_times_x = half_denominator * x;
@@ -879,22 +869,13 @@ FixedPoint<tRawType, 0> logistic(FixedPoint<tRawType, tIntegerBits> a) {
   ResultF result_if_positive = logistic_on_positive_values(abs_input);
   ResultF result_if_negative = ResultF::One() - result_if_positive;
   const ResultF one_half =
-      GEMMLOWP_CHECKED_FIXEDPOINT_CONSTANT(ResultF, 1 << 30, 0.5);
+      TFLITE_MICRO_CHECKED_FIXEDPOINT_CONSTANT(ResultF, 1 << 30, 0.5);
   return SelectUsingMask(mask_if_zero, one_half,
                          SelectUsingMask(mask_if_positive, result_if_positive,
                                          result_if_negative));
 }
 
-}  // end namespace gemmlowp
+}  // namespace micro
+}  // namespace tflite
 
-#ifdef GEMMLOWP_NEON
-#include "./fixedpoint_neon.h"
-#elif defined(GEMMLOWP_AVX2)
-#include "./fixedpoint_avx.h"
-#elif defined(GEMMLOWP_SSE4)
-#include "./fixedpoint_sse.h"
-#elif defined(GEMMLOWP_MSA)
-#include "./fixedpoint_msa.h"
-#endif
-
-#endif  // GEMMLOWP_INTERNAL_FIXEDPOINT_H_
+#endif  // TENSORFLOW_LITE_MICRO_KERNELS_INTERNAL_FIXEDPOINT_H_
