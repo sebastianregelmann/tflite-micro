@@ -2,18 +2,14 @@ name: TFLM Library Sync, Test & Publish Pipeline
 
 on:
   schedule:
-    - cron: '0 0 * * 0'
+    - cron: '0 0 * * 0' # Weekly sync on Sundays
   workflow_dispatch:
     inputs:
       custom_version:
-        description: 'Custom version override (e.g. 1.0.1)'
+        description: 'Custom version override (e.g. 1.0.1). Leave empty to use auto version (1.YY.WW).'
         required: false
         default: ''
         type: string
-
-# Grant write permissions to GITHUB_TOKEN
-permissions:
-  contents: write
 
 jobs:
   build-and-test:
@@ -106,12 +102,13 @@ jobs:
                   f.write(content)
           EOF
 
-      - name: Create Local Commit
+      - name: Create Commit to staging-release branch
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add src library.json readme.md
           git commit -m "chore: sync TFLM $SHORT_COMMIT (v$VERSION)" || echo "No changes to commit"
+          git push origin HEAD:refs/heads/staging-release --force
 
       # --- AUTOMATION 2: Build & Test Environment ---
       - name: Execute Build Tests in Separate Root Folder
@@ -165,9 +162,7 @@ jobs:
         run: |
           pio pkg pack
 
-      - name: Push Changes to Staging Branch
-        run: |
-          git push origin HEAD:refs/heads/staging-release --force
+
 
   # --- AUTOMATION 3: Manual Approval & Publish Gate ---
   publish:

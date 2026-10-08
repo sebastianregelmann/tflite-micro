@@ -16,13 +16,6 @@ Based on [this example](https://github.com/tensorflow/tflite-micro/tree/main/ten
 ### person_detection
 Based on [this example](https://github.com/tensorflow/tflite-micro/tree/main/tensorflow/lite/micro/examples/person_detection). For a more detailed look, read the original example.
 
-
-# Version
-This version is release `1.0.0`.
-
-
-The current version of the library is a build from [this](https://github.com/tensorflow/tflite-micro/commit/1fae6040446d86147b06a1280da4086305e4bcc0) commit to the official [tflite-micro](https://github.com/tensorflow/tflite-micro) repository. 
-
 ## Future Versions 
 The library will be build once every week with the following naming convention: `1.YY.WW`.
 
@@ -34,10 +27,7 @@ I plan to automate this repository using Gihub Actions and workflows to automate
 * https://github.com/tensorflow/tflite-micro
 
 # License
-Apache License
-                           Version 2.0
+Apache License Version 2.0
 
 # Version
-This version is release ``.
-
-The current version of the library is a build from [this](https://github.com/tensorflow/tflite-micro/commit/904193e691ede876f4b8b70e6abe68ae464072f9) commit to the official [tflite-micro](https://github.com/tensorflow/tflite-micro) repository.
+The current version of the library is a build from the official [tflite-micro](https://github.com/tensorflow/tflite-micro) repository using [this commit](https://github.com/tensorflow/tflite-micro/commit/904193e691ede876f4b8b70e6abe68ae464072f9)
