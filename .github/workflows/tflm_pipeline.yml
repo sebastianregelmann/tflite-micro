@@ -43,7 +43,10 @@ jobs:
           echo "SHORT_COMMIT=$SHORT_COMMIT" >> $GITHUB_ENV
 
           # Generate TFLM tree into temp directory
+          echo "Generating Project structure ..."
           python3 tensorflow/lite/micro/tools/project_generation/create_tflm_tree.py ../tmp
+          echo "Generated Project structure"
+
           cd ..
           rm -rf tflite-micro
 
@@ -51,6 +54,8 @@ jobs:
           cp -rf src/examples tmp/ 2>/dev/null || true
           rm -rf src
           mv tmp src
+          echo "Cleaned up Project"
+
 
       - name: Update Version Tag & README
         run: |
@@ -74,7 +79,7 @@ jobs:
           commit_hash = os.environ.get('COMMIT_HASH', '')
           commit_url = f"https://github.com/tensorflow/tflite-micro/commit/{commit_hash}"
 
-          readme_path = 'README.md'
+          readme_path = 'readme.md'
           if os.path.exists(readme_path):
               with open(readme_path, 'r') as f:
                   content = f.read()
@@ -96,7 +101,7 @@ jobs:
               with open(readme_path, 'w') as f:
                   f.write(content)
           EOF
-          
+
       - name: Create Local Commit
         run: |
           git config user.name "github-actions[bot]"
