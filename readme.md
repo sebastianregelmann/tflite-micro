@@ -16,11 +16,10 @@ Based on [this example](https://github.com/tensorflow/tflite-micro/tree/main/ten
 ### person_detection
 Based on [this example](https://github.com/tensorflow/tflite-micro/tree/main/tensorflow/lite/micro/examples/person_detection). For a more detailed look, read the original example.
 
-## Future Versions 
-The library will be build once every week with the following naming convention: `1.YY.WW`.
 
-# Future plans
-I plan to automate this repository using Gihub Actions and workflows to automate the building and publishing work. So that the library that can be used by PlatformIO users is always up to date because most of the libraries that fork the `tflite-micro` project are either not up to date/maintained and/or not the original code but repackaged for a more simplified usage. 
+# Future Versions 
+This repository is using Gihub Actions and workflows to automate the building and publishing work so that the library can be used by PlatformIO users and is always up to date because most of the libraries that fork the `tflite-micro` project are either not up to date/maintained and/or not the original code but repackaged for a more simplified usage. 
+The library will be build once every week with the following naming convention: `1.YY.WW`.
 
 
 # Original Project
@@ -31,3 +30,5 @@ Apache License Version 2.0
 
 # Version
 The current version of the library is a build from the official [tflite-micro](https://github.com/tensorflow/tflite-micro) repository using [this commit](https://github.com/tensorflow/tflite-micro/commit/904193e691ede876f4b8b70e6abe68ae464072f9)
+
+A version history with all versions is visible [here](version_history.md).
