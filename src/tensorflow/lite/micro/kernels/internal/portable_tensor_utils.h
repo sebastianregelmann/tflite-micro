@@ -20,8 +20,8 @@ limitations under the License.
 #include <cmath>
 #include <cstdint>
 
-#include "tensorflow/lite/micro/c/builtin_op_data.h"
-#include "tensorflow/lite/micro/c/common.h"
+#include "tensorflow/lite/micro/builtin_op_data.h"
+#include "tensorflow/lite/micro/micro_common.h"
 
 #if defined(_MSC_VER)
 #define __restrict__ __restrict
@@ -41,7 +41,6 @@ bool PortableIsZeroVector(const T* vector, int v_size) {
   return true;
 }
 
-// LINT.IfChange(portable_symmetric_quantize_floats)
 void PortableSymmetricQuantizeFloats(const float* values, const int size,
                                      int8_t* quantized_values, float* min_value,
                                      float* max_value, float* scaling_factor);
@@ -49,7 +48,6 @@ void PortableSymmetricQuantizeFloats(const float* values, const int size,
 void PortableSymmetricQuantizeFloats(const float* values, const int size,
                                      int8_t* quantized_values, float min_value,
                                      float max_value, float* scaling_factor);
-// LINT.ThenChange(//tensorflow/compiler/mlir/lite/quantization/lite/toco_legacy/portable_tensor_utils.h:portable_symmetric_quantize_floats)
 
 void PortableAsymmetricQuantizeFloats(const float* values, const int size,
                                       int8_t* quantized_values,
