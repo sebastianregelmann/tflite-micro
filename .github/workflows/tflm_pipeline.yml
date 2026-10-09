@@ -81,23 +81,19 @@ jobs:
           version = os.environ.get('VERSION', '')
           commit_url = f"https://github.com/tensorflow/tflite-micro/commit/{commit_hash}"
 
-          # --- Update README.md ---
-          readme_path = 'README.md' if os.path.exists('README.md') else 'readme.md'
+          # --- Update README file(s) ---
+          readme_files = [f for f in os.listdir('.') if f.lower() == 'readme.md']
+          url_pattern = r"https://github\.com/tensorflow/tflite-micro/commit/[a-fA-F0-9]+"
 
-          if os.path.exists(readme_path):
+          for readme_path in readme_files:
               with open(readme_path, 'r') as f:
                   content = f.read()
 
-              # Match: using [this commit](https://github.com/tensorflow/tflite-micro/commit/<hash>)
-              pattern = r"using \[this commit\]\(https://github\.com/tensorflow/tflite-micro/commit/[a-fA-F0-9]+\)"
-              replacement = f"using [this commit]({commit_url})"
-
-              if re.search(pattern, content):
-                  content = re.sub(pattern, replacement, content)
+              new_content = re.sub(url_pattern, commit_url, content)
 
               with open(readme_path, 'w') as f:
-                  f.write(content)
-              print("Updated README")
+                  f.write(new_content)
+              print(f"Updated {readme_path}")
 
           # --- Update version_history.md ---
           history_path = 'version_history.md'
