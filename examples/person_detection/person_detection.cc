@@ -17,7 +17,7 @@
 #include "tensorflow/lite/micro/micro_log.h"
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
 #include "tensorflow/lite/micro/system_setup.h"
-#include "tensorflow/lite/schema/schema_generated.h"
+#include "tensorflow/lite/micro/schema/schema_generated.h" 
 
 #include "examples/person_detection/models/person_detection_model_data.h"
 #include "examples/person_detection/test_data/person_detection_test_data.h"
