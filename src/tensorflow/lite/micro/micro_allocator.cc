@@ -25,7 +25,6 @@ limitations under the License.
 #include "tensorflow/lite/micro/compatibility.h"
 #include "tensorflow/lite/micro/flatbuffer_conversions.h"
 #include "tensorflow/lite/micro/flatbuffer_utils.h"
-#include "tensorflow/lite/micro/kernels/internal/compatibility.h"
 #include "tensorflow/lite/micro/memory_helpers.h"
 #include "tensorflow/lite/micro/memory_planner/greedy_memory_planner.h"
 #include "tensorflow/lite/micro/memory_planner/linear_memory_planner.h"
@@ -34,14 +33,13 @@ limitations under the License.
 #include "tensorflow/lite/micro/micro_arena_constants.h"
 #include "tensorflow/lite/micro/micro_common.h"
 #include "tensorflow/lite/micro/micro_log.h"
-#include "tensorflow/lite/schema/schema_generated.h"
 
 #ifdef USE_TFLM_COMPRESSION
 
 #include <algorithm>
 #include <cstring>
 
-#include "tensorflow/lite/micro/compression/metadata_saved.h"
+#include "tensorflow/lite/micro/compression/metadata_generated.h"
 
 #endif  // USE_TFLM_COMPRESSION
 

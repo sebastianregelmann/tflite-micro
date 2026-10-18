@@ -18,7 +18,7 @@ limitations under the License.
 #include <cstring>
 
 #include "tensorflow/lite/micro/builtin_op_data.h"
-#include "tensorflow/lite/micro/kernels/internal/compatibility.h"
+#include "tensorflow/lite/micro/compatibility.h"
 #include "tensorflow/lite/micro/kernels/kernel_util.h"
 #include "tensorflow/lite/micro/memory_helpers.h"
 #include "tensorflow/lite/micro/micro_common.h"
@@ -36,7 +36,6 @@ struct OpData {
 };
 
 void* WhileInit(TfLiteContext* context, const char* buffer, size_t length) {
-  TFLITE_DCHECK(context->AllocatePersistentBuffer != nullptr);
   return context->AllocatePersistentBuffer(context, sizeof(OpData));
 }
 

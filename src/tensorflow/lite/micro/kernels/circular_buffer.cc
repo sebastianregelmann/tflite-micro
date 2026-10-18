@@ -16,12 +16,11 @@ limitations under the License.
 #include "tensorflow/lite/micro/kernels/circular_buffer.h"
 
 #include "tensorflow/lite/micro/builtin_op_data.h"
+#include "tensorflow/lite/micro/compatibility.h"
 #include "tensorflow/lite/micro/flatbuffer_utils.h"
-#include "tensorflow/lite/micro/kernels/internal/compatibility.h"
 #include "tensorflow/lite/micro/kernels/internal/quantization_util.h"
 #include "tensorflow/lite/micro/kernels/internal/tensor_ctypes.h"
 #include "tensorflow/lite/micro/kernels/kernel_util.h"
-#include "tensorflow/lite/micro/kernels/op_macros.h"
 #include "tensorflow/lite/micro/micro_common.h"
 #include "tensorflow/lite/micro/micro_log.h"
 
@@ -50,7 +49,6 @@ namespace tflite {
 namespace micro {
 void* CircularBufferInit(TfLiteContext* context, const char* buffer,
                          size_t length) {
-  TFLITE_DCHECK(context->AllocatePersistentBuffer != nullptr);
   OpDataCircularBuffer* op_data = static_cast<OpDataCircularBuffer*>(
       context->AllocatePersistentBuffer(context, sizeof(OpDataCircularBuffer)));
 

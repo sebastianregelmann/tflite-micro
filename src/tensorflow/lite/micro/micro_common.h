@@ -129,6 +129,8 @@ namespace tflite {
 namespace micro {
 #endif
 
+// Synced with LiteRT (also update `TfLiteTypeGetName` in `micro_common.cc`):
+// https://github.com/google-ai-edge/LiteRT/blob/main/tflite/converter/core/c/tflite_types.h
 typedef enum {
   kTfLiteNoType = 0,
   kTfLiteFloat32 = 1,
@@ -223,6 +225,13 @@ typedef struct TfLiteBFloat16 {
 } TfLiteBFloat16;
 
 const char* TfLiteTypeGetName(TfLiteType type);
+
+// Return the size of given type in bytes. Return 0 in case of string or
+// sub-byte types.
+int TfLiteTypeGetSize(TfLiteType type);
+
+// Return the size of given type in bits. Returns 0 in case of string.
+int TfLiteTypeGetSizeBits(TfLiteType type);
 
 typedef enum TfLiteQuantizationType {
   kTfLiteNoQuantization = 0,
@@ -334,8 +343,6 @@ TfLiteStatus MicroContextRequestScratchBufferInArena(TfLiteContext* ctx,
                                                      size_t bytes,
                                                      int* buffer_idx);
 void* MicroContextGetScratchBuffer(TfLiteContext* ctx, int buffer_idx);
-TfLiteTensor* MicroContextGetTensor(const TfLiteContext* context,
-                                    int tensor_idx);
 TfLiteEvalTensor* MicroContextGetEvalTensor(const TfLiteContext* context,
                                             int tensor_idx);
 void MicroContextReportOpError(TfLiteContext* context, const char* format, ...);
@@ -372,7 +379,6 @@ typedef struct TfLiteContext {
   static constexpr Method<&MicroContextRequestScratchBufferInArena>
       RequestScratchBufferInArena{};
   static constexpr Method<&MicroContextGetScratchBuffer> GetScratchBuffer{};
-  static constexpr Method<&MicroContextGetTensor> GetTensor{};
   static constexpr Method<&MicroContextGetEvalTensor> GetEvalTensor{};
 #else
   void* impl_;
@@ -421,7 +427,6 @@ using micro::kTfLiteVariant;
 using micro::MicroContextAllocatePersistentBuffer;
 using micro::MicroContextGetEvalTensor;
 using micro::MicroContextGetScratchBuffer;
-using micro::MicroContextGetTensor;
 using micro::MicroContextReportOpError;
 using micro::MicroContextRequestScratchBufferInArena;
 using micro::TfLiteAffineQuantization;
@@ -448,6 +453,8 @@ using micro::TfLiteStatus;
 using micro::TfLiteTensor;
 using micro::TfLiteType;
 using micro::TfLiteTypeGetName;
+using micro::TfLiteTypeGetSize;
+using micro::TfLiteTypeGetSizeBits;
 using micro::TFLMInferenceRegistration;
 using micro::TFLMRegistration;
 

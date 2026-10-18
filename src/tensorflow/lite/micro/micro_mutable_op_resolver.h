@@ -28,11 +28,9 @@ limitations under the License.
 #include "tensorflow/lite/micro/kernels/depthwise_conv.h"
 #include "tensorflow/lite/micro/kernels/ethosu.h"
 #include "tensorflow/lite/micro/kernels/fully_connected.h"
-#include "tensorflow/lite/micro/kernels/internal/compatibility.h"
 #include "tensorflow/lite/micro/kernels/maximum_minimum.h"
 #include "tensorflow/lite/micro/kernels/micro_ops.h"
 #include "tensorflow/lite/micro/kernels/mul.h"
-#include "tensorflow/lite/micro/kernels/op_macros.h"
 #include "tensorflow/lite/micro/kernels/pooling.h"
 #include "tensorflow/lite/micro/kernels/reduce.h"
 #include "tensorflow/lite/micro/kernels/softmax.h"
@@ -42,7 +40,6 @@ limitations under the License.
 #include "tensorflow/lite/micro/micro_common.h"
 #include "tensorflow/lite/micro/micro_log.h"
 #include "tensorflow/lite/micro/micro_op_resolver.h"
-#include "tensorflow/lite/schema/schema_generated.h"
 
 namespace tflite {
 namespace micro {

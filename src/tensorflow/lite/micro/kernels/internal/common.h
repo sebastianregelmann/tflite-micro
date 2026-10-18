@@ -22,10 +22,9 @@ limitations under the License.
 #include <functional>
 #include <type_traits>
 
-#include "tensorflow/lite/micro/kernels/internal/compatibility.h"
+#include "tensorflow/lite/micro/compatibility.h"
 #include "tensorflow/lite/micro/kernels/internal/cppmath.h"
 #include "tensorflow/lite/micro/kernels/internal/fixedpoint.h"
-#include "tensorflow/lite/micro/kernels/internal/optimized/neon_check.h"
 #include "tensorflow/lite/micro/kernels/internal/runtime_shape.h"
 #include "tensorflow/lite/micro/kernels/internal/types.h"
 
