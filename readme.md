@@ -29,6 +29,6 @@ The library will be build once every week with the following naming convention: 
 Apache License Version 2.0
 
 # Version
-The current version of the library is a build from the official [tflite-micro](https://github.com/tensorflow/tflite-micro) repository using [this commit](https://github.com/tensorflow/tflite-micro/commit/64b3de836daf42ef5094d06035742c058e7638f6)
+The current version of the library is a build from the official [tflite-micro](https://github.com/tensorflow/tflite-micro) repository using [this commit](https://github.com/tensorflow/tflite-micro/commit/8f6596d99898deaac36ebd8ff8bf1b9754fd2cd1)
 
 A version history with all versions is visible [here](version_history.md).
