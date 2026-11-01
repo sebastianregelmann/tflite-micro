@@ -8,3 +8,4 @@
 |1.26.41|https://github.com/tensorflow/tflite-micro/commit/230c9d9531bd9b08d445b4f2ed0760756ffd5f78|
 |1.26.42|https://github.com/tensorflow/tflite-micro/commit/64b3de836daf42ef5094d06035742c058e7638f6|
 |1.26.43|https://github.com/tensorflow/tflite-micro/commit/8f6596d99898deaac36ebd8ff8bf1b9754fd2cd1|
+|1.26.44|https://github.com/tensorflow/tflite-micro/commit/9c74b4e7f9cb7afabea9859ef85f7df885148485|
